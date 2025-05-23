@@ -21,12 +21,18 @@ public protocol CredentialContainer: Codable {
     var password: String { get }
 }
 
-/// Represents a response container for an authorized session, such as tokens from OAuth.
+/**
+ Represents a response container for an authorized session, such as tokens from OAuth.
+ Used to authorize and optionally refresh authenticated API requests.
+ 
+ Conforming types provide access to authorization tokens that can be used to authenticate
+ API requests and, if available, to refresh tokens when access expires.
+ */
 public protocol AuthorizedTokenContainer: Codable {
-    /// The access token to authorize API requests.
+    /// The access token used to authorize API requests.
     var accessToken: String { get }
     
-    /// An optional refresh token to renew access once it expires.
+    /// An optional refresh token used to renew access once the current token expires.
     var refreshToken: String? { get }
 }
 

@@ -14,7 +14,7 @@ import Foundation
 
 /// A protocol that represents a cancellable operation, typically associated
 /// with asynchronous or long-running tasks such as HTTP requests or timers.
-public protocol Cancellable: AnyObject {
+@objc public protocol Cancellable: AnyObject {
     /// Cancels the ongoing operation, if possible.
     func cancel()
     
@@ -24,5 +24,5 @@ public protocol Cancellable: AnyObject {
 
 extension URLSessionTask: Cancellable {
     /// Indicates whether the URL session task is currently running and can be cancelled.
-    public var isCancellable: Bool { state == .running }
+    public var isCancellable: Bool { state == .running || state == .suspended }
 }

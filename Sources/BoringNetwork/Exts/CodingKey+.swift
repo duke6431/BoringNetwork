@@ -13,24 +13,35 @@ import Foundation
 
 /// A generic, string-based coding key used for dynamic key access in Codable containers.
 /// This enables runtime-based key injection during encoding or decoding.
-public struct StringCodingKey: CodingKey, Hashable, ExpressibleByStringLiteral {
-    /// The string key value.
+public struct StringCodingKey: CodingKey, Hashable, ExpressibleByStringLiteral, CustomStringConvertible {
+    /// The string key value used during encoding or decoding.
     public var stringValue: String
     
+    /// A description of the key, useful for debugging.
+    public var description: String { stringValue }
+    
     /// Initializes with a given string value.
-    public init(stringValue: String) { self.stringValue = stringValue }
+    public init(stringValue: String) {
+        self.stringValue = stringValue
+    }
     
-    /// Convenience initializer.
-    public init(_ stringValue: String) { self.init(stringValue: stringValue) }
+    /// Convenience initializer using raw string.
+    public init(_ stringValue: String) {
+        self.init(stringValue: stringValue)
+    }
     
-    /// Not supported for string-based keys.
-    public var intValue: Int?
+    /// Not supported. Returns `nil` because this key is purely string-based.
+    public var intValue: Int? { nil }
     
-    /// Not supported for string-based keys.
-    public init?(intValue: Int) { return nil }
+    /// Not supported. Always returns `nil` because integer keys are not applicable.
+    public init?(intValue: Int) {
+        return nil
+    }
     
-    /// Initializes from a string literal.
-    public init(stringLiteral value: String) { self.init(value) }
+    /// Initializes from a string literal (e.g., "keyName").
+    public init(stringLiteral value: String) {
+        self.init(stringValue: value)
+    }
 }
 
 /// Extension to enable encoding with dynamic string keys in a keyed encoding container.

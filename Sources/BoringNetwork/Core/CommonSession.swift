@@ -27,7 +27,7 @@ public protocol BoringSessioning: AnyObject {
     @discardableResult
     func execute(
         request: URLRequest,
-        completionHandler: ((Data?, URLResponse?, Error?) -> Void)?
+        completionHandler: (@Sendable (Data?, URLResponse?, Error?) -> Void)?
     ) -> Cancellable
     
     /// A list of active clients registered with the session.
@@ -65,11 +65,18 @@ extension BoringSessioning {
     }
     
     /// Attempts to instantiate a client using its registered factory.
+    @discardableResult
     private func generate<Client: BaseClient>() -> Client? {
         let client = (clientFactories[String(describing: Client.self)]?() as? Client)
         client?._session = self
         return client
     }
+    
+    /// Default: empty array for clients.
+    public var clients: [BaseClient] { [] }
+    
+    /// Default: empty dictionary for client factories.
+    public var clientFactories: [String: () -> BaseClient] { [:] }
 }
 
 extension Result where Success == Cancellable, Failure == Error {

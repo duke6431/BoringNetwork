@@ -15,22 +15,25 @@ import Foundation
 /// A generic wrapper to extract a nested value from a keyed container.
 /// Intended for use when APIs nest payloads under a specific key (e.g., "data").
 open class Wrappable<T: Decodable>: Decodable {
-    /// Override this property to specify the key used to extract the nested object.
-    open var key: String { fatalError("Wrappable key must be overridden") }
+    public let key: String
+    public var data: T?
     
-    /// The decoded value extracted from the nested key.
-    open var data: T?
-    
-    /// Initializes the wrapper and decodes the nested value from the specified key.
-    ///
-    /// - Parameter decoder: The decoder used to read the data.
-    public required init(from decoder: any Decoder) throws {
-        data = try (try decoder.container(keyedBy: StringCodingKey.self)).decode(T.self, for: key)
+    public required init(key: String) {
+        self.key = key
     }
     
-    /// Returns the extracted value, if any.
+    public required convenience init(from decoder: any Decoder) throws {
+        self.init(key: Self.keyName)
+        let container = try decoder.container(keyedBy: StringCodingKey.self)
+        data = try container.decode(T.self, forKey: StringCodingKey(stringValue: key))
+    }
+    
+    open class var keyName: String {
+        fatalError("Subclasses must override `keyName`.")
+    }
+    
     open func value() -> T? {
-        return data
+        data
     }
 }
 
@@ -65,20 +68,20 @@ public enum BaseKeyCodingStrategy {
     }
 }
 
+extension BaseKeyCodingStrategy: Codable {}
+
 public extension Encodable {
-    /// Converts the Encodable object into a dictionary, if possible.
-    ///
-    /// - Returns: A `[String: Any]` representation of the object, or nil on failure.
-    var dictionary: [String: Any]? {
-        do {
-            return try JSONSerialization.jsonObject(
-                with: try JSONEncoder().encode(self),
-                options: .allowFragments
-            ) as? [String: Any]
-        } catch {
-            print(error.localizedDescription)
-            return nil
+    func tryDictionary() throws -> [String: Any] {
+        let data = try JSONEncoder().encode(self)
+        let object = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        guard let dict = object as? [String: Any] else {
+            throw EncodingError.invalidValue(self, .init(codingPath: [], debugDescription: "Encoded object is not a dictionary"))
         }
+        return dict
+    }
+    
+    var dictionary: [String: Any]? {
+        try? tryDictionary()
     }
 }
 

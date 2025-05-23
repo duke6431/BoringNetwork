@@ -79,7 +79,9 @@ open class CompletionClient: BaseClient {
                 return
             }
             do {
-                let item = try JSONDecoder().with(strategy: self?.keyCodingStrategy).decode(T.self, from: data)
+                let item = try self?.decode(T.self, from: data) ?? {
+                    throw NetworkError.Internal.inconsistent.with(detail: "Key coding strategy not available")
+                }()
                 completion(.success(item))
             } catch {
                 completion(.failure(NetworkError.Invalid.data.with(underlying: error)))
@@ -100,7 +102,7 @@ open class CompletionClient: BaseClient {
             switch result {
             case .success(let success):
                 guard let value = success.value() else {
-                    completion(.failure(NetworkError.Invalid.response.with(detail: "Fail to decode wrappable for type \(String(describing: W.Type.self))")))
+                    completion(.failure(NetworkError.Invalid.response.with(detail: "Wrapped value is nil for \(W.self)")))
                     return
                 }
                 completion(.success(value))
@@ -121,6 +123,19 @@ open class CompletionClient: BaseClient {
                 completion(.failure(failure))
             }
         })
+    }
+    
+    // MARK: - Private Decoding Helper
+    
+    /// Decodes data into the specified `Decodable` type using the configured key coding strategy.
+    ///
+    /// - Parameters:
+    ///   - type: The type to decode.
+    ///   - data: The raw data to decode from.
+    /// - Returns: The decoded instance of the specified type.
+    /// - Throws: An error if decoding fails.
+    private func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        try JSONDecoder().with(strategy: keyCodingStrategy).decode(type, from: data)
     }
 }
 

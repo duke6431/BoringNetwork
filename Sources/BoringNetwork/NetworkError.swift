@@ -61,9 +61,16 @@ public enum NetworkError {
     
     /// Error cases related to invalid request or response data.
     public class Invalid: BaseErrorImpl {
+        /// Indicates that a URL was invalid or malformed.
         public static let url = Invalid(id: 1)
+        
+        /// Indicates that the request could not be constructed or was ill-formed.
         public static let request = Invalid(id: 2)
+        
+        /// Indicates that the response was invalid or could not be parsed.
         public static let response = Invalid(id: 3)
+        
+        /// Indicates that the response body data was invalid or malformed.
         public static let data = Invalid(id: 4)
     }
     
@@ -178,13 +185,18 @@ extension NetworkError.Internal: LocalizedError {
 
 extension NetworkError.Network: LocalizedError {
     public var errorDescription: String? {
+        let category = "Network"
+        let prefix = "NetworkError.\(category)"
+        let message: String
         switch self {
         case .networkLost:
-            return "NetworkError - Network lost - \(detail ?? "Empty")"
+            message = "Network lost"
         case .unauthorized:
-            return "NetworkError - Unauthorized - \(detail ?? "Empty")"
+            message = "Unauthorized"
         default:
-            return "NetworkError - Network error id \(id) - \(detail ?? "Empty")"
+            message = "Unknown network error (id: \(id))"
         }
+        // Use consistent formatting and add category label for unknown/future cases.
+        return "\(prefix) – \(message) – \(detail ?? "No details")"
     }
 }

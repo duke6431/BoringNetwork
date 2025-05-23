@@ -33,14 +33,14 @@ public class BoringContainer {
     public private(set) var authClient: (BaseClient & AuthService)?
     
     /// The session for unauthenticated clients.
-    private lazy var publicSession: BoringSession = {
+    public private(set) lazy var publicSession: BoringSession = {
         var session: BoringSession = .init(session: session)
         if let authClient { session = session.register(authClient) }
         return session
     }()
     
     /// The session for authenticated clients.
-    private lazy var secureSession: SecureSession = {
+    public private(set) lazy var secureSession: SecureSession = {
         guard let authClient else { fatalError("AuthClient was not configured") }
         return .init(session: session, authClient: authClient)
     }()

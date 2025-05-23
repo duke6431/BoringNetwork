@@ -111,8 +111,9 @@ open class ReactiveClient: BaseClient {
                 throw errorHandler?(response, raw.data) ?? NetworkError.Internal.notImplemented.with(detail: "Default error handler not found")
             }
             return raw.data
-        }.map { [keyCodingStrategy] in
-            try JSONDecoder().with(strategy: keyCodingStrategy).decode(T.self, from: $0)
+        }.map { [weak self] in
+            guard let self else { throw NetworkError.Internal.inconsistent }
+            return try self.decode(T.self, from: $0)
         }
     }
     
@@ -130,9 +131,9 @@ open class ReactiveClient: BaseClient {
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: W.Type
     ) -> Single<T> {
-        object(from: request, errorHandler: errorHandler).map { (wrapped: W) in
+        object(from: request, errorHandler: errorHandler).map { [weak self] (wrapped: W) in
             guard let value = wrapped.value() else {
-                throw NetworkError.Invalid.response.with(detail: "Fail to decode wrappable for type \(String(describing: W.Type.self))")
+                throw NetworkError.Invalid.response.with(detail: "Wrapped value is nil for \(W.self)")
             }
             return value
         }
@@ -183,5 +184,11 @@ extension ReactiveClient {
         using wrapper: Wrapper.Type
     ) -> Single<[Response]> {
         constructRequest(with: endpoint).flatMap { self.wrappedArray(from: $0, errorHandler: errorHandler, using: wrapper) }
+    }
+}
+
+private extension ReactiveClient {
+    func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        try JSONDecoder().with(strategy: keyCodingStrategy).decode(type, from: data)
     }
 }

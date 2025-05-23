@@ -65,7 +65,7 @@ open class BoringSession: BoringSessioning {
     @discardableResult
     open func execute(
         request: URLRequest,
-        completionHandler: ((Data?, URLResponse?, Error?) -> Void)?
+        completionHandler: (@Sendable (Data?, URLResponse?, Error?) -> Void)?
     ) -> Cancellable {
         let task = session.dataTask(with: request) { data, response, error in
             if (error as? URLError)?.code == .notConnectedToInternet {
@@ -79,13 +79,7 @@ open class BoringSession: BoringSessioning {
             }
             
             if !(200..<300).contains(httpResponse.statusCode) {
-                let failure = NetworkError.Network.failure(
-                    request: request,
-                    response: response,
-                    data: data,
-                    underlying: error,
-                    comment: "Non-2xx status code received."
-                )
+                let failure = self.makeHTTPFailure(request, response, data, error)
                 completionHandler?(data, response, failure)
                 return
             }
@@ -95,5 +89,22 @@ open class BoringSession: BoringSessioning {
         
         defer { task.resume() }
         return task
+    }
+    
+    /// Constructs a failure error for HTTP responses with non-2xx status codes.
+    private func makeHTTPFailure(
+        _ request: URLRequest,
+        _ response: URLResponse?,
+        _ data: Data?,
+        _ error: Error?
+    ) -> Error {
+        let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+        return NetworkError.Network.failure(
+            request: request,
+            response: response,
+            data: data,
+            underlying: error,
+            comment: "Received status code \(status): \(HTTPURLResponse.localizedString(forStatusCode: status))"
+        )
     }
 }

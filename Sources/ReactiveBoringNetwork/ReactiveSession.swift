@@ -72,30 +72,36 @@ open class ReactiveSecureSession: SecureSession, ReactiveSessioning  {
         if let token = authClient.tokenStore.accessToken {
             authenticatedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
+        
         return .create { [weak self] single in
-            let request = self?.execute(request: authenticatedRequest, completionHandler: { data, response, error in
-                if let error {
-                    single(.failure(error))
-                    return
-                }
-                guard let response, let data else {
-                    single(.failure(NetworkError.Internal.inconsistent))
-                    return
-                }
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    single(.success(.init(data, response)))
-                    return
-                }
-                if httpResponse.statusCode == 401 {
-                    self?.authClient.requestAuthentication()
-                    single(.failure(NetworkError.Network.unauthorized))
-                    return
-                }
-                single(.success(.init(data, response)))
-            })
+            let task = self?.execute(request: authenticatedRequest) { data, response, error in
+                self?.handleSecureResponse(data: data, response: response, error: error, single: single)
+            }
             return Disposables.create {
-                if request?.isCancellable ?? false { request?.cancel() }
+                if task?.isCancellable ?? false { task?.cancel() }
             }
         }
+    }
+    
+    private func handleSecureResponse(
+        data: Data?,
+        response: URLResponse?,
+        error: Error?,
+        single: @escaping (SingleEvent<RawResponse>) -> Void
+    ) {
+        if let error = error {
+            single(.failure(error))
+            return
+        }
+        guard let data = data, let response = response else {
+            single(.failure(NetworkError.Internal.inconsistent))
+            return
+        }
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
+            authClient.requestAuthentication()
+            single(.failure(NetworkError.Network.unauthorized))
+            return
+        }
+        single(.success(.init(data, response)))
     }
 }
