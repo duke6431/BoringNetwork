@@ -131,7 +131,7 @@ open class ReactiveClient: BaseClient {
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: W.Type
     ) -> Single<T> {
-        object(from: request, errorHandler: errorHandler).map { [weak self] (wrapped: W) in
+        object(from: request, errorHandler: errorHandler).map { (wrapped: W) in
             guard let value = wrapped.value() else {
                 throw NetworkError.Invalid.response.with(detail: "Wrapped value is nil for \(W.self)")
             }

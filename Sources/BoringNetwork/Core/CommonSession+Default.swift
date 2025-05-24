@@ -16,6 +16,8 @@ import Foundation
 /// A default implementation of `BoringSessioning` using `URLSession`.
 /// Manages registration of typed clients and provides standardized request execution.
 open class BoringSession: BoringSessioning {
+    public var interceptors: [Interceptor] = []
+    
     /// The list of registered client instances.
     public private(set) var clients: [BaseClient] = []
     
@@ -67,24 +69,42 @@ open class BoringSession: BoringSessioning {
         request: URLRequest,
         completionHandler: (@Sendable (Data?, URLResponse?, Error?) -> Void)?
     ) -> Cancellable {
+        let request = interceptors.reduce(request) { result, interceptor in interceptor.adapt(result) }
         let task = session.dataTask(with: request) { data, response, error in
-            if (error as? URLError)?.code == .notConnectedToInternet {
-                completionHandler?(nil, nil, NetworkError.Network.networkLost)
-                return
+            let interceptors = self.interceptors
+            @Sendable func applyInterceptors(
+                index: Int,
+                result: (Data?, URLResponse?, Error?),
+                completion: @escaping ((Data?, URLResponse?, Error?)) -> Void
+            ) {
+                guard index < interceptors.count else {
+                    completion(result)
+                    return
+                }
+                interceptors[index].intercept(result) { newResult in
+                    applyInterceptors(index: index + 1, result: newResult, completion: completion)
+                }
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                completionHandler?(data, response, error)
-                return
+            applyInterceptors(index: 0, result: (data, response, error)) { finalData, finalResponse, finalError in
+                if (finalError as? URLError)?.code == .notConnectedToInternet {
+                    completionHandler?(nil, nil, NetworkError.Network.networkLost)
+                    return
+                }
+                
+                guard let httpResponse = finalResponse as? HTTPURLResponse else {
+                    completionHandler?(finalData, finalResponse, finalError)
+                    return
+                }
+                
+                if !(200..<300).contains(httpResponse.statusCode) {
+                    let failure = self.makeHTTPFailure(request, finalResponse, finalData, finalError)
+                    completionHandler?(finalData, finalResponse, failure)
+                    return
+                }
+                
+                completionHandler?(finalData, finalResponse, finalError)
             }
-            
-            if !(200..<300).contains(httpResponse.statusCode) {
-                let failure = self.makeHTTPFailure(request, response, data, error)
-                completionHandler?(data, response, failure)
-                return
-            }
-            
-            completionHandler?(data, response, error)
         }
         
         defer { task.resume() }
