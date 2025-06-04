@@ -53,7 +53,7 @@ open class BoringSession: BoringSessioning {
     /// Initializes the session with a given `URLSession`.
     ///
     /// - Parameter session: The `URLSession` to use. Defaults to `.shared`.
-    public init(session: URLSession = .shared) {
+    public required init(session: URLSession = .shared) {
         self.session = session
     }
     

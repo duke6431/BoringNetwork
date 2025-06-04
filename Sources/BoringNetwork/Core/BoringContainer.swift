@@ -25,7 +25,7 @@ public extension BoringContainer {
 
 /// A container responsible for managing public and secure session clients.
 /// It supports dynamic registration of clients, including an optional auth client.
-public class BoringContainer {
+public class BoringContainer<Public: BoringSession, Secure: SecureSession> {
     /// The base URL session shared across all session clients.
     private let session: URLSession
     
@@ -33,14 +33,14 @@ public class BoringContainer {
     public private(set) var authClient: (BaseClient & AuthService)?
     
     /// The session for unauthenticated clients.
-    public private(set) lazy var publicSession: BoringSession = {
-        var session: BoringSession = .init(session: session)
+    public private(set) lazy var publicSession: Public = {
+        var session: Public = .init(session: session)
         if let authClient { session = session.register(authClient) }
         return session
     }()
     
     /// The session for authenticated clients.
-    public private(set) lazy var secureSession: SecureSession = {
+    public private(set) lazy var secureSession: Secure = {
         guard let authClient else { fatalError("AuthClient was not configured") }
         return .init(session: session, authClient: authClient)
     }()

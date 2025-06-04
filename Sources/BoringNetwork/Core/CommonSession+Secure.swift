@@ -69,12 +69,17 @@ open class SecureSession: BoringSession {
     /// - Parameters:
     ///   - session: The `URLSession` instance to use (defaults to `.shared`).
     ///   - authClient: The service used to retrieve and refresh tokens.
-    public init(
+    public required init(
         session: URLSession = .shared,
         authClient: AuthService
     ) {
         self.authClient = authClient
         super.init(session: session)
+    }
+    
+    @available(iOS, unavailable)
+    public required init(session: URLSession = .shared) {
+        fatalError("This function is not ment to be called")
     }
     
     /// Executes the request, injecting the `Authorization` header with a bearer token if available.
