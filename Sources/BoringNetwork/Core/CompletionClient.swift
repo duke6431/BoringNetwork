@@ -142,25 +142,25 @@ open class CompletionClient: BaseClient {
 extension CompletionClient {
     /// Performs a typed request using an `Endpoint` and decodes a single object.
     @discardableResult
-    public func object<Request: Encodable, Response: Decodable>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, completion: @escaping (Result<Response, Error>) -> Void) -> Cancellable? {
+    public func object<Response: Decodable>(from endpoint: Endpoint, errorHandler: NetworkError.NetHandler? = nil, completion: @escaping (Result<Response, Error>) -> Void) -> Cancellable? {
         object(from: try? constructRequest(with: endpoint), errorHandler: errorHandler, completion: completion)
     }
     
     /// Performs a typed request using an `Endpoint` and decodes an array of objects.
     @discardableResult
-    public func array<Request: Encodable, Response: Decodable>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, completion: @escaping (Result<[Response], Error>) -> Void) -> Cancellable? {
+    public func array<Response: Decodable>(from endpoint: Endpoint, errorHandler: NetworkError.NetHandler? = nil, completion: @escaping (Result<[Response], Error>) -> Void) -> Cancellable? {
         array(from: try? constructRequest(with: endpoint), errorHandler: errorHandler, completion: completion)
     }
     
     /// Performs a typed request and decodes a wrapped response.
     @discardableResult
-    public func wrappedResponse<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type, completion: @escaping (Result<Response, Error>) -> Void) -> Cancellable? {
+    public func wrappedResponse<Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type, completion: @escaping (Result<Response, Error>) -> Void) -> Cancellable? {
         wrappedResponse(from: try? constructRequest(with: endpoint), errorHandler: errorHandler, using: Wrapper.self, completion: completion)
     }
     
     /// Performs a typed request and decodes a wrapped array response.
     @discardableResult
-    public func wrappedArrayResponse<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type, completion: @escaping (Result<[Response], Error>) -> Void) -> Cancellable? {
+    public func wrappedArrayResponse<Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type, completion: @escaping (Result<[Response], Error>) -> Void) -> Cancellable? {
         wrappedArrayResponse(from: try? constructRequest(with: endpoint), errorHandler: errorHandler, using: Wrapper.self, completion: completion)
     }
 }
