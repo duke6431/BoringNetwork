@@ -152,15 +152,15 @@ open class BaseClient: NSObject {
     /// - Parameter endpoint: The endpoint describing the API request.
     /// - Returns: A configured URLRequest if successful.
     public func constructRequest(
-        with endpoint: Endpoint
+        with endpoint: EndpointConvertible
     ) throws -> URLRequest? {
         var request = try constructRequest(
-            with: endpoint.path,
-            method: endpoint.method,
-            parameters: endpoint.request,
-            additionalHeaders: endpoint.headers
+            with: endpoint.endpoint.path,
+            method: endpoint.endpoint.method,
+            parameters: endpoint.endpoint.request,
+            additionalHeaders: endpoint.endpoint.headers
         )
-        if let timeoutInterval = endpoint.timeoutInterval {
+        if let timeoutInterval = endpoint.endpoint.timeoutInterval {
             request?.timeoutInterval = timeoutInterval
         }
         return request

@@ -61,7 +61,7 @@ open class ReactiveClient: BaseClient {
     
     /// Constructs a request from a strongly typed `Endpoint` definition.
     public func constructRequest(
-        with endpoint: Endpoint
+        with endpoint: EndpointConvertible
     ) -> Single<URLRequest> {
         .create { [weak self] single in
             do {
@@ -154,7 +154,7 @@ open class ReactiveClient: BaseClient {
 extension ReactiveClient {
     /// Executes a typed `Endpoint` request and decodes a single object.
     public func object<Response: Decodable>(
-        from endpoint: Endpoint,
+        from endpoint: EndpointConvertible,
         errorHandler: NetworkError.NetHandler? = nil
     ) -> Single<Response> {
         constructRequest(with: endpoint).flatMap { self.object(from: $0, errorHandler: errorHandler) }
@@ -162,7 +162,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes an array of objects.
     public func array<Response: Decodable>(
-        from endpoint: Endpoint,
+        from endpoint: EndpointConvertible,
         errorHandler: NetworkError.NetHandler? = nil
     ) -> Single<[Response]> {
         constructRequest(with: endpoint).flatMap { self.array(from: $0, errorHandler: errorHandler) }
@@ -170,7 +170,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes a wrapped single object.
     public func wrapped<Response: Decodable, Wrapper: Wrappable<Response>>(
-        from endpoint: Endpoint,
+        from endpoint: EndpointConvertible,
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: Wrapper.Type
     ) -> Single<Response> {
@@ -179,7 +179,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes a wrapped array of objects.
     public func wrappedArray<Response: Decodable, Wrapper: Wrappable<Response>>(
-        from endpoint: Endpoint,
+        from endpoint: EndpointConvertible,
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: Wrapper.Type
     ) -> Single<[Response]> {

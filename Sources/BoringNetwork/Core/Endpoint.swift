@@ -22,7 +22,7 @@ public protocol EndpointConvertible {
 /// A protocol that defines a typed HTTP endpoint, including its path, method,
 /// headers, request body, and timeout settings. Used to describe API routes
 /// in a composable and reusable manner.
-open class Endpoint {
+open class Endpoint: EndpointConvertible {
     /// The HTTP method for the request (e.g., GET, POST).
     open var method: BaseClient.HTTPMethod
     
@@ -49,4 +49,6 @@ open class Endpoint {
         self.headers = headers
         self.request = request
     }
+    
+    public var endpoint: Endpoint { self }
 }
