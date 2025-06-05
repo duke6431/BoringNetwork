@@ -15,11 +15,14 @@ import Foundation
 /// A default empty request payload used when no request body is needed.
 public struct Empty: Encodable {}
 
+protocol EndpointConvertible {
+    var endpoint: Endpoint { get }
+}
+
 /// A protocol that defines a typed HTTP endpoint, including its path, method,
 /// headers, request body, and timeout settings. Used to describe API routes
 /// in a composable and reusable manner.
-public class Endpoint<Query: Encodable> {
-    
+public class Endpoint {
     /// The HTTP method for the request (e.g., GET, POST).
     public var method: BaseClient.HTTPMethod
     
@@ -36,9 +39,9 @@ public class Endpoint<Query: Encodable> {
     public var headers: [String: String]?
     
     /// The payload to be encoded into the request body or query.
-    public var request: Query
+    public var request: Encodable
     
-    public init(method: BaseClient.HTTPMethod, path: String, baseURL: URL? = nil, timeoutInterval: TimeInterval? = nil, headers: [String : String]? = nil, request: Query) {
+    public init(method: BaseClient.HTTPMethod, path: String, baseURL: URL? = nil, timeoutInterval: TimeInterval? = nil, headers: [String : String]? = nil, request: Encodable) {
         self.method = method
         self.path = path
         self.baseURL = baseURL
