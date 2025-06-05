@@ -70,7 +70,7 @@ open class ReactiveSecureSession: SecureSession, ReactiveSessioning  {
     open func execute(request: URLRequest) -> Single<RawResponse> {
         var authenticatedRequest = request
         if let token = authClient.tokenStore.accessToken {
-            authenticatedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            authenticatedRequest.setValue(token, forHTTPHeaderField: "Authorization")
         }
         
         return .create { [weak self] single in

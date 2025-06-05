@@ -12,30 +12,6 @@
 
 import Foundation
 
-/// Represents basic credentials used for authentication, such as login and password.
-public protocol CredentialContainer: Codable {
-    /// The username used for authentication.
-    var username: String { get }
-    
-    /// The password used for authentication.
-    var password: String { get }
-}
-
-/**
- Represents a response container for an authorized session, such as tokens from OAuth.
- Used to authorize and optionally refresh authenticated API requests.
- 
- Conforming types provide access to authorization tokens that can be used to authenticate
- API requests and, if available, to refresh tokens when access expires.
- */
-public protocol AuthorizedTokenContainer: Codable {
-    /// The access token used to authorize API requests.
-    var accessToken: String { get }
-    
-    /// An optional refresh token used to renew access once the current token expires.
-    var refreshToken: String? { get }
-}
-
 /// A service capable of handling authentication and token refresh flows.
 public protocol AuthService: AnyObject {
     /// The token storage associated with this service.
@@ -96,7 +72,7 @@ open class SecureSession: BoringSession {
     ) -> Cancellable {
         var authenticatedRequest = request
         if let token = authClient.tokenStore.accessToken {
-            authenticatedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            authenticatedRequest.setValue(token, forHTTPHeaderField: "Authorization")
         }
         return super.execute(request: authenticatedRequest, completionHandler: { [weak authClient] data, response, error in
             guard let httpResponse = response as? HTTPURLResponse else {

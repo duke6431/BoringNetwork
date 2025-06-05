@@ -45,7 +45,7 @@ class AsyncSecureSession: SecureSession, AsyncSessioning {
     public func execute(request: URLRequest) async throws -> (Data, URLResponse) {
         var authenticatedRequest = request
         if let token = authClient.tokenStore.accessToken {
-            authenticatedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            authenticatedRequest.setValue(token, forHTTPHeaderField: "Authorization")
         }
         
         return try await Self.bridgeAsync(request: authenticatedRequest) { request, completion in
