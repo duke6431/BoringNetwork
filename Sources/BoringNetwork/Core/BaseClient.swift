@@ -27,7 +27,7 @@ open class BaseClient: NSObject {
     public let baseUrl: URL
     
     /// Determines the JSON key encoding strategy.
-    public let keyCodingStrategy: BaseKeyCodingStrategy = .useDefaultKeys
+    open var keyCodingStrategy: BaseKeyCodingStrategy = .useDefaultKeys
     
     /// The backing session for executing requests.
     weak var _session: BoringSessioning?
