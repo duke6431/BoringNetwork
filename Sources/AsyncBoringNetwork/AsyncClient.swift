@@ -103,7 +103,7 @@ extension AsyncClient {
     ///   - errorHandler: Optional handler for customizing error conversion.
     /// - Returns: A decoded object of type `Response`.
     @inlinable
-    public func object<Request: Encodable, Response: Decodable>(from endpoint: any Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil) async throws -> Response {
+    public func object<Request: Encodable, Response: Decodable>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil) async throws -> Response {
         try await object(from: try constructRequest(with: endpoint), errorHandler: errorHandler)
     }
     
@@ -114,7 +114,7 @@ extension AsyncClient {
     ///   - errorHandler: Optional handler for customizing error conversion.
     /// - Returns: An array of decoded objects of type `Response`.
     @inlinable
-    public func array<Request: Encodable, Response: Decodable>(from endpoint: any Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil) async throws -> [Response] {
+    public func array<Request: Encodable, Response: Decodable>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil) async throws -> [Response] {
         try await array(from: try constructRequest(with: endpoint), errorHandler: errorHandler)
     }
     
@@ -126,7 +126,7 @@ extension AsyncClient {
     ///   - using: The wrapper type that conforms to `Wrappable`.
     /// - Returns: The unwrapped value of type `Response`.
     @inlinable
-    public func wrapped<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: any Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type) async throws -> Response {
+    public func wrapped<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type) async throws -> Response {
         try await wrapped(from: try constructRequest(with: endpoint), errorHandler: errorHandler, using: Wrapper.self)
     }
     
@@ -138,7 +138,7 @@ extension AsyncClient {
     ///   - using: The wrapper type that conforms to `Wrappable`.
     /// - Returns: An array of unwrapped values of type `Response`.
     @inlinable
-    public func wrappedArray<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: any Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type) async throws -> [Response] {
+    public func wrappedArray<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(from endpoint: Endpoint<Request>, errorHandler: NetworkError.NetHandler? = nil, using: Wrapper.Type) async throws -> [Response] {
         try await  wrappedArray(from: try constructRequest(with: endpoint), errorHandler: errorHandler, using: Wrapper.self)
     }
 }

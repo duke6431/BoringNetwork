@@ -18,31 +18,32 @@ public struct Empty: Encodable {}
 /// A protocol that defines a typed HTTP endpoint, including its path, method,
 /// headers, request body, and timeout settings. Used to describe API routes
 /// in a composable and reusable manner.
-public protocol Endpoint<Query>: Sendable {
-    /// The type of the request body or query parameters. Must conform to `Encodable`.
-    associatedtype Query: Encodable = Empty
+public class Endpoint<Query: Encodable> {
     
     /// The HTTP method for the request (e.g., GET, POST).
-    var method: BaseClient.HTTPMethod { get }
+    public var method: BaseClient.HTTPMethod
     
     /// The endpoint path to be appended to the base URL.
-    var path: String { get }
+    public var path: String
     
     /// An optional base URL to override the default session base URL.
-    var baseURL: URL? { get }
+    public var baseURL: URL?
     
     /// An optional timeout interval for the request. If `nil`, the session default is used.
-    var timeoutInterval: TimeInterval? { get }
+    public var timeoutInterval: TimeInterval?
     
     /// Optional headers to be included with the request. Overrides session headers on conflict.
-    var headers: [String: String]? { get }
+    public var headers: [String: String]?
     
     /// The payload to be encoded into the request body or query.
-    var request: Query { get }
-}
-
-public extension Endpoint {
-    var timeoutInterval: TimeInterval? { nil }
-    var headers: [String: String]? { nil }
-    var baseURL: URL? { nil }
+    public var request: Query
+    
+    public init(method: BaseClient.HTTPMethod, path: String, baseURL: URL? = nil, timeoutInterval: TimeInterval? = nil, headers: [String : String]? = nil, request: Query) {
+        self.method = method
+        self.path = path
+        self.baseURL = baseURL
+        self.timeoutInterval = timeoutInterval
+        self.headers = headers
+        self.request = request
+    }
 }

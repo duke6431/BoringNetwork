@@ -61,7 +61,7 @@ open class ReactiveClient: BaseClient {
     
     /// Constructs a request from a strongly typed `Endpoint` definition.
     public func constructRequest<Parameter>(
-        with endpoint: any Endpoint<Parameter>
+        with endpoint: Endpoint<Parameter>
     ) -> Single<URLRequest> where Parameter: Encodable {
         .create { [weak self] single in
             do {
@@ -154,7 +154,7 @@ open class ReactiveClient: BaseClient {
 extension ReactiveClient {
     /// Executes a typed `Endpoint` request and decodes a single object.
     public func object<Request: Encodable, Response: Decodable>(
-        from endpoint: any Endpoint<Request>,
+        from endpoint: Endpoint<Request>,
         errorHandler: NetworkError.NetHandler? = nil
     ) -> Single<Response> {
         constructRequest(with: endpoint).flatMap { self.object(from: $0, errorHandler: errorHandler) }
@@ -162,7 +162,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes an array of objects.
     public func array<Request: Encodable, Response: Decodable>(
-        from endpoint: any Endpoint<Request>,
+        from endpoint: Endpoint<Request>,
         errorHandler: NetworkError.NetHandler? = nil
     ) -> Single<[Response]> {
         constructRequest(with: endpoint).flatMap { self.array(from: $0, errorHandler: errorHandler) }
@@ -170,7 +170,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes a wrapped single object.
     public func wrapped<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(
-        from endpoint: any Endpoint<Request>,
+        from endpoint: Endpoint<Request>,
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: Wrapper.Type
     ) -> Single<Response> {
@@ -179,7 +179,7 @@ extension ReactiveClient {
     
     /// Executes a typed `Endpoint` request and decodes a wrapped array of objects.
     public func wrappedArray<Request: Encodable, Response: Decodable, Wrapper: Wrappable<Response>>(
-        from endpoint: any Endpoint<Request>,
+        from endpoint: Endpoint<Request>,
         errorHandler: NetworkError.NetHandler? = nil,
         using wrapper: Wrapper.Type
     ) -> Single<[Response]> {

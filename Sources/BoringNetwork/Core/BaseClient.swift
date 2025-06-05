@@ -152,7 +152,7 @@ open class BaseClient: NSObject {
     /// - Parameter endpoint: The endpoint describing the API request.
     /// - Returns: A configured URLRequest if successful.
     public func constructRequest<Parameter: Encodable>(
-        with endpoint: any Endpoint<Parameter>
+        with endpoint: Endpoint<Parameter>
     ) throws -> URLRequest? {
         var request = try constructRequest(
             with: endpoint.path,
